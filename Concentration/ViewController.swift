@@ -12,12 +12,25 @@ class ViewController: UIViewController {
     // MARK: VARIABLES & CONSTANTS
     // MARK: UI Variables
     @IBOutlet private var cardButtons: [UIButton]!
-    @IBOutlet private weak var flipCountLabel: UILabel!
+    @IBOutlet private weak var flipCountLabel: UILabel! {
+        didSet {
+            updateFlipCountLabel()
+        }
+    }
 
     private(set) var flipCount = 0 {
         didSet {
-            flipCountLabel.text = "Flips: \(flipCount)"
+            updateFlipCountLabel()
         }
+    }
+    
+    private func updateFlipCountLabel() {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .strokeWidth: 5.0,
+            .strokeColor: #colorLiteral(red: 0.3450980392, green: 0.337254902, blue: 0.8392156863, alpha: 1)
+        ]
+        let attributedString = NSAttributedString(string: "Flips: \(flipCount)", attributes: attributes)
+        flipCountLabel.attributedText = attributedString
     }
     
     // MARK: Game Initialization
@@ -29,11 +42,16 @@ class ViewController: UIViewController {
     private lazy var game: Concentration = Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
     
     // MARK: Emoji
-    private var emojiChoices = ["🥰","😘","😍","🤪", "🙌🏻","👋🏻","😱","🍑","❤️", "😈"]
-    private var emoji = [Int: String]()
+    private var emojiChoices = "🥰😘😍🤪🙌🏻👋🏻😱🍑❤️😈😡🥶😳🤢💩😺🔥🔫💣💎💵🚗🚙🥂🍷🫐🥭"
+    private var emoji = [Card: String]()
     
     // MARK: METHODS
-    // MARK: UI Actions
+    // MARK: Starts "New Game"
+    @IBAction private func newGame(_ sender: UIButton) {
+        print("New Game touched!")
+    }
+    
+    // MARK: Game Model
     @IBAction private func touchCard(_ sender: UIButton) {
         flipCount += 1
         if let cardNumber = cardButtons.firstIndex(of: sender) {
@@ -59,13 +77,15 @@ class ViewController: UIViewController {
     }
     
     private func emoji(for card: Card) -> String {
-        if emoji[card.identifier] == nil, emojiChoices.count > 0 {
-            emoji[card.identifier] = emojiChoices.remove(at: emojiChoices.count.arc4random)
+        if emoji[card] == nil, emojiChoices.count > 0 {
+            let randomStringIndex = emojiChoices.index(emojiChoices.startIndex, offsetBy: emojiChoices.count.arc4random)
+            emoji[card] = String(emojiChoices.remove(at: randomStringIndex))
         }
-        return emoji[card.identifier] ?? "?"
+        return emoji[card] ?? "?"
     }
 }
 
+// MARK: Extension for Int (arc4random)
 extension Int {
     var arc4random: Int {
         if self > 0 {
